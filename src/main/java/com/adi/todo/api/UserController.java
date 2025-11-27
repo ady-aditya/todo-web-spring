@@ -20,6 +20,6 @@ public class UserController {
 
     @PostMapping("/login")
     public Mono<String> login(@RequestBody LoginRequest request) {
-        return jwtService.checkUserAndGenerateToken(request.getEmail());
+        return jwtService.checkUserAndGenerateToken(request.getEmail(),request.getUid());
     }   
 }

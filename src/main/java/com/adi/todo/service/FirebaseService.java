@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 @Service
-public class FirebaseAuthService {
+public class FirebaseService {
     
     public Mono<UserRecord> getUserByEmail(String email) {
         return Mono.fromCallable(() -> {
