@@ -1,0 +1,24 @@
+name: Manual Deploy to Render
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Docker Image Tag to Deploy (e.g., a1b2c3d)'
+        required: true
+        default: 'latest'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Deployment
+        run: |
+          # The Render Deploy Hook URL usually contains a key parameter (e.g., ?key=xyz)
+          # We append the imgURL parameter to specify the exact tag to deploy.
+          # Note: We assume RENDER_DEPLOY_HOOK already includes the ?key=... part.
+          
+          DEPLOY_URL="${{ secrets.RENDER_DEPLOY_HOOK }}&imgURL=docker.io/${{ secrets.DOCKER_USERNAME }}/todoapiapp:${{ github.event.inputs.tag }}"
+          
+          echo "Triggering deployment for tag: ${{ github.event.inputs.tag }}"
+          curl -X POST "$DEPLOY_URL"
