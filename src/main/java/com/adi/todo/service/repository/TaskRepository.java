@@ -7,4 +7,6 @@ import reactor.core.publisher.Flux;
 
 public interface TaskRepository extends ReactiveCrudRepository<Task, Long> {
     Flux<Task> findByTaskid(String taskid);
+
+    Flux<Task> findByDayid(Long dayid);
 }

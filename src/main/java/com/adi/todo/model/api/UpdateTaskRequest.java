@@ -3,8 +3,8 @@ package com.adi.todo.model.api;
 import lombok.Data;
 
 @Data
-public class AddTaskRequest {
+public class UpdateTaskRequest {
+    private String taskId;
     private String name;
-    private String day;
     private boolean completed;
 }
