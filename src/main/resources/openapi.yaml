@@ -1,0 +1,230 @@
+openapi: 3.0.3
+info:
+  title: Todo API
+  description: API documentation for the Todo application allowing users to manage tasks.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local Development Server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  
+  schemas:
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        uid:
+          type: string
+          example: "firebase-uid-123"
+    
+    AddTaskRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Buy groceries"
+        day:
+          type: string
+          example: "2023-10-27"
+        completed:
+          type: boolean
+          example: false
+    
+    UpdateTaskRequest:
+      type: object
+      properties:
+        taskId:
+          type: string
+          example: "task-uuid-1234"
+        name:
+          type: string
+          example: "Buy groceries and milk"
+        completed:
+          type: boolean
+          example: true
+
+    Task:
+      type: object
+      properties:
+        taskid:
+          type: string
+          example: "task-uuid-1234"
+        name:
+          type: string
+          example: "Buy groceries"
+        userEmail:
+          type: string
+          example: "user@example.com"
+        completed:
+          type: boolean
+          example: false
+    
+    DayTasks:
+      type: object
+      properties:
+        day:
+          type: string
+          example: "2023-10-27"
+        tasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/Task'
+    
+    TasksResponse:
+      type: object
+      properties:
+        daysTasks:
+          type: array
+          items:
+            $ref: '#/components/schemas/DayTasks'
+
+paths:
+  /api/user/login:
+    post:
+      summary: User Login
+      description: Authenticates a user and returns a JWT token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Successful login
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6Ik..."
+  
+  /api/task/addTask:
+    post:
+      summary: Add a new task
+      description: Creates a new task for the authenticated user.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddTaskRequest'
+      responses:
+        '200':
+          description: Task successfully added
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Task Added Successfully"
+        '400':
+          description: Validation error
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Task name cannot be empty"
+        '500':
+          description: Internal server error
+
+  /api/task/updateTask:
+    post:
+      summary: Update a task
+      description: Updates an existing task for the authenticated user.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTaskRequest'
+      responses:
+        '200':
+          description: Task successfully updated
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Task Updated Successfully"
+        '400':
+          description: Validation error
+        '500':
+          description: Internal server error
+
+  /api/task/fetchTasks:
+    get:
+      summary: Fetch tasks
+      description: Retrieves tasks for the user, grouped by day.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: header
+          name: day
+          schema:
+            type: string
+            example: "2023-10-27"
+          required: false
+          description: Specific day to fetch tasks for.
+        - in: header
+          name: numberOfDays
+          schema:
+            type: integer
+            default: 100
+          required: false
+          description: Number of days to look ahead/back (default 100).
+      responses:
+        '200':
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TasksResponse'
+
+  /api/task/deleteTask/{taskId}:
+    delete:
+      summary: Delete a task
+      description: Deletes a specific task by its ID. Users can only delete their own tasks, and tasks cannot be deleted if they are more than 3 days old.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: taskId
+          required: true
+          schema:
+            type: string
+          description: The unique ID of the task to delete.
+      responses:
+        '200':
+          description: Task successfully deleted
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Task deleted successfully"
+        '403':
+          description: Forbidden - Unauthorized or task too old
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Unauthorized to delete this task"
+        '404':
+          description: Task not found
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: "Task not found"
+        '500':
+          description: Internal server error

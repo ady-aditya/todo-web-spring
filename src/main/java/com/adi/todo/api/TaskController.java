@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import com.adi.todo.model.exception.TodoAppException;
 
 @RestController
 @RequestMapping("/api/task")
@@ -69,6 +72,17 @@ public class TaskController {
             taskValidator.validateDay(day);
         return taskService.fetchTasks(day, numberOfDays, userEmail)
                 .map(result -> ResponseEntity.ok(result));
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @DeleteMapping("deleteTask/{taskId}")
+    public Mono<ResponseEntity<String>> deleteTask(@PathVariable("taskId") String taskId, ServerWebExchange exchange) {
+        String userEmail = (String) exchange.getAttributes().get("email");
+        return taskService.deleteTask(taskId, userEmail)
+                .map(result -> ResponseEntity.ok(result))
+                .onErrorResume(TodoAppException.class,
+                        e -> Mono.just(ResponseEntity.status(e.getStatus()).body(e.getErrorMessage())))
+                .onErrorResume(error -> Mono.just(ResponseEntity.status(500).body(error.getMessage())));
     }
 
 }

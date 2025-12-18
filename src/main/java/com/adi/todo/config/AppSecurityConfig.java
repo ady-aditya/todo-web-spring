@@ -9,7 +9,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain;
 import static org.springframework.security.config.Customizer.withDefaults;
 
 @EnableWebFluxSecurity
-@EnableReactiveMethodSecurity 
+@EnableReactiveMethodSecurity
 @Configuration
 public class AppSecurityConfig {
 
@@ -23,15 +23,31 @@ public class AppSecurityConfig {
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
-            .csrf(ServerHttpSecurity.CsrfSpec::disable)
-            .authorizeExchange(exchanges -> exchanges
-                .pathMatchers("/api/user/login").permitAll()
-                .anyExchange().authenticated()
-            )
-            // Add JWT filter before the authentication filter
-            .addFilterAt(jwtFilter, org.springframework.security.config.web.server.SecurityWebFiltersOrder.AUTHENTICATION)
-            .httpBasic(withDefaults())
-            // .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
-            .build();
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Link to the CORS config
+                .authorizeExchange(exchanges -> exchanges
+                        .pathMatchers("/api/user/login").permitAll()
+                        .anyExchange().authenticated())
+                // Add JWT filter before the authentication filter
+                .addFilterAt(jwtFilter,
+                        org.springframework.security.config.web.server.SecurityWebFiltersOrder.AUTHENTICATION)
+                .httpBasic(withDefaults())
+                // .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
+                .build();
+    }
+
+    @Bean
+    public org.springframework.web.cors.reactive.CorsConfigurationSource corsConfigurationSource() {
+        org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
+        // Allow specific origins (e.g., your frontend). Use "*" for development if
+        // needed, but specific is safer.
+        configuration.setAllowedOriginPatterns(java.util.List.of("http://localhost:5*"));
+        configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(java.util.List.of("*")); // Allow all headers
+        configuration.setAllowCredentials(true);
+
+        org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource source = new org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

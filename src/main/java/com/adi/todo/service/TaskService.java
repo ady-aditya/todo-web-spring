@@ -6,8 +6,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Random;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -128,7 +126,7 @@ public class TaskService {
         } else {
             return dayRepository.findByUserEmailOrderByCreatedDateDescLimit(userEmail, numberOfDays)
                     .flatMap(dayEntity -> {
-                        log.info("dayEntity: {}", dayEntity);
+                        // log.info("dayEntity: {}", dayEntity);
                         return taskRepository.findByDayid(dayEntity.getId())
                                 .collectList()
                                 .map(tasks -> {
@@ -158,6 +156,30 @@ public class TaskService {
             // return response;
             // });
         }
+    }
+
+    public Mono<String> deleteTask(String taskId, String userEmail) {
+        return taskRepository.findByTaskid(taskId)
+                .collectList()
+                .flatMap(existingTasks -> {
+                    if (existingTasks.isEmpty()) {
+                        return Mono.error(new TodoAppException(HttpStatus.NOT_FOUND, "Task not found"));
+                    }
+                    Task task = existingTasks.get(0);
+                    if (!task.getUserEmail().equals(userEmail)) {
+                        return Mono
+                                .error(new TodoAppException(HttpStatus.FORBIDDEN, "Unauthorized to delete this task"));
+                    }
+                    return dayRepository.findById(task.getDayid())
+                            .flatMap(day -> {
+                                if (day.getCreatedDate().isBefore(LocalDate.now().minusDays(3))) {
+                                    return Mono.error(new TodoAppException(HttpStatus.FORBIDDEN,
+                                            "Tasks more than 3 days old cannot be deleted"));
+                                }
+                                return taskRepository.delete(task)
+                                        .thenReturn("Task deleted successfully");
+                            });
+                });
     }
 
 }
