@@ -41,7 +41,10 @@ public class AppSecurityConfig {
         org.springframework.web.cors.CorsConfiguration configuration = new org.springframework.web.cors.CorsConfiguration();
         // Allow specific origins (e.g., your frontend). Use "*" for development if
         // needed, but specific is safer.
-        configuration.setAllowedOriginPatterns(java.util.List.of("http://localhost:5*"));
+        configuration.setAllowedOriginPatterns(java.util.List.of(
+                "http://localhost:5*",
+                "https://aditodo.pages.dev",
+                "https://*.aditodo.pages.dev"));
         configuration.setAllowedMethods(java.util.List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(java.util.List.of("*")); // Allow all headers
         configuration.setAllowCredentials(true);
