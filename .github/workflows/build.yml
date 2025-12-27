@@ -56,5 +56,5 @@ jobs:
         tags: |
           docker.io/${{ secrets.DOCKER_USERNAME }}/todoapiapp:${{ steps.vars.outputs.sha_short }}
           docker.io/${{ secrets.DOCKER_USERNAME }}/todoapiapp:latest
-          asia-south1-docker.pkg.dev/todoapi/todo-repo/todoapiapp:${{ steps.vars.outputs.sha_short }}
-          asia-south1-docker.pkg.dev/todoapi/todo-repo/todoapiapp:latest
+          asia-south1-docker.pkg.dev/todoapi-482413/todo-repo/todoapiapp:${{ steps.vars.outputs.sha_short }}
+          asia-south1-docker.pkg.dev/todoapi-482413/todo-repo/todoapiapp:latest
