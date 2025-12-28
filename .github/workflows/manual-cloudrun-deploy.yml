@@ -1,0 +1,55 @@
+name: Manual Cloud Run Deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Docker image tag to deploy (leave empty for latest)"
+        required: false
+        default: "latest"
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PROJECT_ID: todoapi-482413
+  REGION: asia-south1
+  SERVICE_NAME: todo-api
+  REPOSITORY: todo-repo
+  IMAGE_NAME: todoapiapp
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout (optional, for traceability)
+      uses: actions/checkout@v4
+
+    - name: Authenticate to Google Cloud
+      uses: google-github-actions/auth@v2
+      with:
+        workload_identity_provider: projects/385153166712/locations/global/workloadIdentityPools/github-pool/providers/github
+        service_account: gha-docker@todoapi-482413.iam.gserviceaccount.com
+
+    - name: Set up gcloud
+      uses: google-github-actions/setup-gcloud@v2
+
+    - name: Deploy to Cloud Run
+      run: |
+        IMAGE_TAG="${{ github.event.inputs.image_tag }}"
+        if [ -z "$IMAGE_TAG" ]; then
+          IMAGE_TAG="latest"
+        fi
+
+        IMAGE_URI="asia-south1-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_NAME}:${IMAGE_TAG}"
+
+        echo "Deploying image: $IMAGE_URI"
+
+        gcloud run deploy ${SERVICE_NAME} \
+          --image ${IMAGE_URI} \
+          --region ${REGION} \
+          --platform managed \
+          --allow-unauthenticated \
+          --quiet
