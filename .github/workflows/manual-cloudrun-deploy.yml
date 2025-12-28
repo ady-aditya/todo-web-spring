@@ -51,5 +51,4 @@ jobs:
           --image ${IMAGE_URI} \
           --region ${REGION} \
           --platform managed \
-          --allow-unauthenticated \
           --quiet
