@@ -55,19 +55,27 @@ jobs:
 
         echo "Deploying image: $IMAGE_URI"
 
-        # 1. Fetch current env vars into a string
-        ENV_VARS=$(gcloud run services describe ${SERVICE_NAME} \
-          --platform managed \
-          --region ${REGION} \
-          --format='value(spec.template.spec.containers[0].env.map().join(","))')
-
-        echo "env vars: $ENV_VARS"
-
         gcloud run deploy ${SERVICE_NAME} \
           --image ${IMAGE_URI} \
           --region ${REGION} \
-          --set-env-vars "$ENV_VARS" \
-          --quiet
+          --platform managed \
+          --quiet \
+          --clear-env-vars \
+          --set-env-vars="IGNORE_ME=TRUE" # This is a trick to force a merge
+
+        # 1. Fetch current env vars into a string
+        # ENV_VARS=$(gcloud run services describe ${SERVICE_NAME} \
+        #   --platform managed \
+        #   --region ${REGION} \
+        #   --format='value(spec.template.spec.containers[0].env.map().join(","))')
+
+        # echo "env vars: $ENV_VARS"
+
+        # gcloud run deploy ${SERVICE_NAME} \
+        #   --image ${IMAGE_URI} \
+        #   --region ${REGION} \
+        #   --set-env-vars "$ENV_VARS" \
+        #   --quiet
 
         # gcloud run services update ${SERVICE_NAME} \
         #   --image ${IMAGE_URI} \
