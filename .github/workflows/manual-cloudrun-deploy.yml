@@ -37,18 +37,26 @@ jobs:
       uses: google-github-actions/setup-gcloud@v2
 
     - name: Deploy to Cloud Run
-      run: |
-        IMAGE_TAG="${{ github.event.inputs.image_tag }}"
-        if [ -z "$IMAGE_TAG" ]; then
-          IMAGE_TAG="latest"
-        fi
+      uses: google-github-actions/deploy-cloudrun@v2
+      with:
+        service: ${{ env.SERVICE_NAME }}
+        region: ${{ env.REGION }}
+        image: asia-south1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.image_tag || 'latest' }}
+        # This action defaults to keeping existing env vars if you don't define 'env_vars'
 
-        IMAGE_URI="asia-south1-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_NAME}:${IMAGE_TAG}"
+    # - name: Deploy to Cloud Run
+    #   run: |
+    #     IMAGE_TAG="${{ github.event.inputs.image_tag }}"
+    #     if [ -z "$IMAGE_TAG" ]; then
+    #       IMAGE_TAG="latest"
+    #     fi
 
-        echo "Deploying image: $IMAGE_URI"
+    #     IMAGE_URI="asia-south1-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_NAME}:${IMAGE_TAG}"
 
-        gcloud run deploy ${SERVICE_NAME} \
-          --image ${IMAGE_URI} \
-          --region ${REGION} \
-          --platform managed \
-          --quiet
+    #     echo "Deploying image: $IMAGE_URI"
+
+    #     gcloud run deploy ${SERVICE_NAME} \
+    #       --image ${IMAGE_URI} \
+    #       --region ${REGION} \
+    #       --platform managed \
+    #       --quiet
