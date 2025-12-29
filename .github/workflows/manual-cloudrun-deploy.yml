@@ -55,13 +55,17 @@ jobs:
 
         echo "Deploying image: $IMAGE_URI"
 
-        gcloud run deploy ${SERVICE_NAME} \
+        gcloud beta run services patch ${SERVICE_NAME} \
           --image ${IMAGE_URI} \
-          --region ${REGION} \
-          --platform managed \
-          --quiet \
-          --clear-env-vars \
-          --set-env-vars="IGNORE_ME=TRUE" # This is a trick to force a merge
+          --region ${REGION}
+
+        # gcloud run deploy ${SERVICE_NAME} \
+        #   --image ${IMAGE_URI} \
+        #   --region ${REGION} \
+        #   --platform managed \
+        #   --quiet \
+        #   --clear-env-vars \
+        #   --set-env-vars="IGNORE_ME=TRUE" # This is a trick to force a merge
 
         # 1. Fetch current env vars into a string
         # ENV_VARS=$(gcloud run services describe ${SERVICE_NAME} \
