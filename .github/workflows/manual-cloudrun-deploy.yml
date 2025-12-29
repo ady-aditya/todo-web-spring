@@ -35,16 +35,6 @@ jobs:
 
     - name: Set up gcloud
       uses: google-github-actions/setup-gcloud@v2
-      # with:
-      #   install_components: 'beta' # This installs beta non-interactively
-
-    # - name: Deploy to Cloud Run
-    #   uses: google-github-actions/deploy-cloudrun@v2
-    #   with:
-    #     service: ${{ env.SERVICE_NAME }}
-    #     region: ${{ env.REGION }}
-    #     image: asia-south1-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.IMAGE_NAME }}:${{ github.event.inputs.image_tag || 'latest' }}
-    #     # This action defaults to keeping existing env vars if you don't define 'env_vars'
 
     - name: Deploy to Cloud Run
       run: |
@@ -56,32 +46,6 @@ jobs:
         IMAGE_URI="asia-south1-docker.pkg.dev/${PROJECT_ID}/${REPOSITORY}/${IMAGE_NAME}:${IMAGE_TAG}"
 
         echo "Deploying image: $IMAGE_URI"
-
-        # gcloud beta run services patch ${SERVICE_NAME} \
-        #   --image ${IMAGE_URI} \
-        #   --region ${REGION}
-
-        # gcloud run deploy ${SERVICE_NAME} \
-        #   --image ${IMAGE_URI} \
-        #   --region ${REGION} \
-        #   --platform managed \
-        #   --quiet \
-        #   --clear-env-vars \
-        #   --set-env-vars="IGNORE_ME=TRUE" # This is a trick to force a merge
-
-        # 1. Fetch current env vars into a string
-        ENV_VARS=$(gcloud run services describe ${SERVICE_NAME} \
-          --platform managed \
-          --region ${REGION} \
-          --format='value(spec.template.spec.containers[0].env.map().join(","))')
-
-        echo "env vars: $ENV_VARS"
-
-        # gcloud run deploy ${SERVICE_NAME} \
-        #   --image ${IMAGE_URI} \
-        #   --region ${REGION} \
-        #   --set-env-vars "$ENV_VARS" \
-        #   --quiet
 
         gcloud run services update ${SERVICE_NAME} \
           --image ${IMAGE_URI} \
