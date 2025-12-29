@@ -15,7 +15,7 @@ permissions:
 env:
   PROJECT_ID: todoapi-482413
   REGION: asia-south1
-  SERVICE_NAME: todo-api
+  SERVICE_NAME: todoapiapp
   REPOSITORY: todo-repo
   IMAGE_NAME: todoapiapp
 
