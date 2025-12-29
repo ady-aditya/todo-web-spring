@@ -35,6 +35,8 @@ jobs:
 
     - name: Set up gcloud
       uses: google-github-actions/setup-gcloud@v2
+      with:
+        install_components: 'beta' # This installs beta non-interactively
 
     # - name: Deploy to Cloud Run
     #   uses: google-github-actions/deploy-cloudrun@v2
