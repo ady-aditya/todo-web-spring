@@ -5,6 +5,8 @@ on:
     branches:
       - main
       - feature-refactorTaskCrud
+    paths-ignore:
+      - '.github/workflows/**'
   workflow_dispatch:
 
 permissions:
